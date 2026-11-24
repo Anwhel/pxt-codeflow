@@ -100,3 +100,7 @@ npm run serve     # serves docs/ at http://localhost:8080
 - `docs/app.js` is the page: pasting code, share links, rendering, hover links, export and
   editor-extension messaging.
 - The libraries (TypeScript 5.4.5 and Mermaid 11.4.1) load from jsDelivr.
+
+#### Metadata (used for search, rendering)
+
+* for PXT/arcade
