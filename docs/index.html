@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codeflow</title>
+  <meta name="description" content="See a MakeCode Arcade game as plain-English pseudocode and flowcharts.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="9" y="2" width="14" height="7" rx="3.5"/>
+        <path d="M16 12 L23 17 L16 22 L9 17 Z"/>
+        <rect x="9" y="25" width="14" height="5" rx="1"/>
+        <path d="M16 9v3M16 22v3" />
+      </svg>
+      <div>
+        <h1>Codeflow</h1>
+        <p class="tagline">Your MakeCode Arcade game as pseudocode and flowcharts</p>
+      </div>
+    </div>
+    <div class="top-actions" id="topActions" hidden>
+      <div class="seg" role="group" aria-label="What to show">
+        <button data-view="both" class="on">Both</button>
+        <button data-view="pseudo">Pseudocode</button>
+        <button data-view="flow">Flowcharts</button>
+      </div>
+      <button id="copyAll" class="btn">Copy all pseudocode</button>
+      <button id="printBtn" class="btn">Print</button>
+      <button id="refreshBtn" class="btn primary" hidden>Refresh from MakeCode</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="inputPanel" class="panel input">
+      <details id="inputDetails" open>
+        <summary><span>Your code</span><span class="summary-hint" id="summaryHint"></span></summary>
+        <div class="input-grid">
+          <div>
+            <label for="code" class="label">Paste your game's JavaScript</label>
+            <textarea id="code" spellcheck="false" placeholder="controller.A.onEvent(ControllerButtonEvent.Pressed, function () { ... })"></textarea>
+            <div class="row">
+              <button id="go" class="btn primary">Show pseudocode &amp; flowcharts</button>
+              <button id="example" class="btn">Try an example</button>
+              <button id="clear" class="btn ghost">Clear</button>
+            </div>
+          </div>
+          <div class="help">
+            <h2>How to get your code</h2>
+            <ol>
+              <li>Open your game in MakeCode Arcade.</li>
+              <li>Click <b>JavaScript</b> at the top of the editor.</li>
+              <li>Click in the code, press <kbd>Ctrl</kbd>+<kbd>A</kbd> then <kbd>Ctrl</kbd>+<kbd>C</kbd>.</li>
+              <li>Paste it into the box and press the button.</li>
+            </ol>
+            <p class="or">or load a shared project</p>
+            <div class="share">
+              <input id="shareUrl" type="url" placeholder="https://makecode.com/_abc123…" aria-label="Shared project link">
+              <button id="loadShare" class="btn">Load</button>
+            </div>
+            <p class="small">In MakeCode use <b>Share</b> to get a link. Your blocks are turned into JavaScript automatically.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <div id="status" class="status" role="status" hidden></div>
+    <div id="warnings"></div>
+
+    <nav id="toc" class="toc" hidden aria-label="Sections"></nav>
+
+    <aside id="legend" class="legend" hidden>
+      <span class="key"><svg viewBox="0 0 44 22"><rect x="1" y="1" width="42" height="20" rx="10" class="k-terminal"/></svg>Start / End</span>
+      <span class="key"><svg viewBox="0 0 44 22"><rect x="1" y="1" width="42" height="20" class="k-process"/></svg>Action</span>
+      <span class="key"><svg viewBox="0 0 44 22"><path d="M22 1 L43 11 L22 21 L1 11 Z" class="k-decision"/></svg>Decision (Yes / No)</span>
+      <span class="key"><svg viewBox="0 0 44 22"><path d="M8 1 H43 L36 21 H1 Z" class="k-io"/></svg>Input / Output</span>
+      <span class="key"><svg viewBox="0 0 44 22"><rect x="1" y="1" width="42" height="20" class="k-sub"/><path d="M6 1v20M38 1v20" class="k-sub-line"/></svg>Run a function / timer</span>
+      <span class="key hint">Hover a line of pseudocode to find it in the flowchart.</span>
+    </aside>
+
+    <div id="sections"></div>
+
+    <section id="empty" class="empty">
+      <p>Paste some code above, or <button class="linklike" id="example2">try an example game</button>.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    Codeflow reads MakeCode Arcade JavaScript (blocks projects too). Nothing is uploaded: everything runs in your browser.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/typescript@5.4.5/lib/typescript.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script src="codeflow.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

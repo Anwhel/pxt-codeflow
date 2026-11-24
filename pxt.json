@@ -1,0 +1,23 @@
+{
+    "name": "codeflow",
+    "version": "0.1.0",
+    "description": "See your game as plain-English pseudocode and flowcharts",
+    "dependencies": {
+        "device": "*"
+    },
+    "files": [
+        "main.ts",
+        "README.md"
+    ],
+    "testFiles": [],
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "tsprj",
+    "extension": {
+        "namespace": "codeflow",
+        "label": "Show pseudocode & flowcharts",
+        "color": "#4b3fd8",
+        "url": "https://anwhel.github.io/Codeflow/"
+    }
+}

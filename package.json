@@ -1,0 +1,22 @@
+{
+  "name": "codeflow",
+  "version": "0.1.0",
+  "description": "MakeCode Arcade code as pseudocode and flowcharts",
+  "scripts": {
+    "test": "node test/run.js",
+    "serve": "npx --yes http-server docs -p 8080 -c-1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anwhel/Codeflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Anwhel/Codeflow/issues"
+  },
+  "homepage": "https://github.com/Anwhel/Codeflow#readme",
+  "devDependencies": {
+    "mermaid": "11.4.1",
+    "typescript": "5.4.5"
+  },
+  "private": true
+}
