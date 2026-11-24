@@ -40,6 +40,13 @@ You can copy the pseudocode, save flowcharts as PNG or SVG, or print the whole p
 Block projects work too, because MakeCode turns blocks into JavaScript.
 Everything runs in the browser and nothing is uploaded.
 
+## Blocks
+
+Codeflow adds **no blocks** and does not change how a game runs. When the extension is added
+to a project, a **Codeflow** toolbox category appears with one button,
+**Show pseudocode & flowcharts**. The button opens Codeflow inside the editor, and Codeflow
+reads the project's code (it never changes it).
+
 ## Putting the page online (GitHub Pages)
 
 The web page lives in `docs/`. On GitHub go to **Settings → Pages**. Set **Source** to

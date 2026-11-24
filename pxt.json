@@ -9,7 +9,9 @@
         "main.ts",
         "README.md"
     ],
-    "testFiles": [],
+    "testFiles": [
+        "test.ts"
+    ],
     "supportedTargets": [
         "arcade"
     ],
