@@ -19,5 +19,6 @@
         "label": "Show pseudocode & flowcharts",
         "color": "#4b3fd8",
         "url": "https://anwhel.github.io/Codeflow/"
-    }
+    },
+    "license": "MIT"
 }

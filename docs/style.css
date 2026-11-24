@@ -195,9 +195,8 @@ body[data-view="pseudo"] .pseudo { border-right: 0; }
 .flow { padding: 12px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; min-height: 120px; }
 .flow svg { max-width: 100%; height: auto; }
 .flow .err { color: var(--str); font-size: 13px; }
-.flow g.node.hl rect, .flow g.node.hl polygon, .flow g.node.hl path, .flow g.node.hl circle {
-  stroke: var(--hl-stroke) !important; stroke-width: 3px !important;
-}
+/* A glow, because Mermaid's class colours override stroke styles. */
+.flow g.node.hl { filter: drop-shadow(0 0 3px var(--hl-stroke)) drop-shadow(0 0 3px var(--hl-stroke)); }
 .flow g.node { cursor: pointer; }
 
 .parent-note { font-size: 12.5px; color: var(--muted); padding: 8px 14px 0; }

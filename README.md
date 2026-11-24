@@ -3,6 +3,8 @@
 Codeflow shows a MakeCode Arcade game as **plain-English pseudocode** and **flowcharts**.
 It is built for students learning to read and explain code.
 
+![Codeflow showing an overlap event as pseudocode next to its flowchart](docs/screenshot.png)
+
 ```
 WHEN A Button Pressed:
     IF mySprite is hitting a wall on the Bottom:
