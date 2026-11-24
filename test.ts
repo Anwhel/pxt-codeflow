@@ -8,5 +8,6 @@ let hero = sprites.create(img`
     `, SpriteKind.Player)
 controller.moveSprite(hero)
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    codeflow.describe("add a point")
     info.changeScoreBy(1)
 })

@@ -42,10 +42,26 @@ Everything runs in the browser and nothing is uploaded.
 
 ## Blocks
 
-Codeflow adds **no blocks** and does not change how a game runs. When the extension is added
-to a project, a **Codeflow** toolbox category appears with one button,
-**Show pseudocode & flowcharts**. The button opens Codeflow inside the editor, and Codeflow
-reads the project's code (it never changes it).
+When the extension is added to a project, a **Codeflow** toolbox category appears. At the
+top is the **Show pseudocode & flowcharts** button, which opens Codeflow inside the editor.
+Codeflow reads the project's code but never changes it.
+
+### describe
+
+```blocks
+codeflow.describe("make the player jump")
+```
+
+Lets a student write, in their own words, what a part of the game should do. The block does
+nothing when the game runs. Codeflow shows it in the pseudocode as `PURPOSE:` at that point,
+so students can check that their code does what they meant:
+
+```
+WHEN A Button Pressed:
+    PURPOSE: make the player jump
+    IF mySprite is hitting a wall on the Bottom:
+        SET mySprite's y velocity TO -150
+```
 
 ## Putting the page online (GitHub Pages)
 

@@ -727,6 +727,14 @@
         });
         return [{ id }];
       }
+      // codeflow.describe("...") is the student's own description: show it
+      // in the pseudocode only (it does nothing when the game runs).
+      if (ts.isCallExpression(e) && calleeName(e) === 'codeflow.describe') {
+        const arg = e.arguments[0];
+        const text = arg && (ts.isStringLiteral(arg) || ts.isNoSubstitutionTemplateLiteral(arg)) ? arg.text : expr(arg, ctx);
+        b.lines.push({ depth, text: 'PURPOSE: ' + text, nodeId: null, note: true });
+        return pending;
+      }
       const io = { io: false };
       const r = statementText(e, ctx, io);
       return simple(b, pending, depth, r.text, r.shape || (io.io ? 'io' : 'process'));

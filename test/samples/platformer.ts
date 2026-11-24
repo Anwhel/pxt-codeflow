@@ -2,6 +2,7 @@ namespace SpriteKind {
     export const Coin = SpriteKind.create()
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    codeflow.describe("make the player jump")
     if (mySprite.isHittingTile(CollisionDirection.Bottom)) {
         mySprite.vy = -150
         music.baDing.play()
