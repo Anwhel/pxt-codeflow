@@ -1,6 +1,6 @@
 # Codeflow
 
-Codeflow shows a MakeCode Arcade game as **plain-English pseudocode** and **flowcharts**.
+Codeflow shows a MakeCode Arcade game, or a Unity game's C# scripts, as **plain-English pseudocode** and **flowcharts**.
 It is built for students learning to read and explain code.
 
 ![Codeflow showing an overlap event as pseudocode next to its flowchart](docs/screenshot.png)
@@ -39,6 +39,29 @@ You can copy the pseudocode, save flowcharts as PNG or SVG, or print the whole p
 
 Block projects work too, because MakeCode turns blocks into JavaScript.
 Everything runs in the browser and nothing is uploaded.
+
+## Unity (C#)
+
+On the web page, choose **Unity (C#)**, then paste a script or click **Add .cs files**.
+You can also drag scripts from the project's `Assets` folder onto the box. Several scripts
+can be added at once, and each script gets its own group of sections:
+
+| In the script | Codeflow section |
+| --- | --- |
+| fields (`public float speed = 5f;`) | **VARIABLES**, noting which ones can be changed in the Inspector |
+| `Awake`, `Start` | **WHEN this object is created** / **WHEN this object starts** |
+| `Update`, `FixedUpdate`, `LateUpdate` | **EVERY FRAME** / **EVERY PHYSICS STEP** |
+| `OnCollisionEnter2D(other)`, `OnTriggerEnter(other)`, … | **WHEN this object hits something (other)**, **WHEN something (other) enters this object's trigger**, … |
+| `IEnumerator` methods | **COROUTINE** (`yield return new WaitForSeconds(2)` becomes `WAIT 2 seconds`) |
+| your own methods | **FUNCTION** |
+
+Both 2D and 3D scripts work. Common Unity commands get plain-English wording, for example:
+- `Input.GetKeyDown(KeyCode.Space)` becomes `the Space key is pressed`.
+- `Random.Range(0, 3)` becomes `a random whole number from 0 up to (not including) 3`.
+
+Unity mode is only on the web page. Inside the MakeCode editor, Codeflow is always in
+MakeCode mode. To open the page straight into Unity mode, add `?lang=unity` to the address:
+`https://anwhel.github.io/pxt-codeflow/?lang=unity`
 
 ## Blocks
 
@@ -89,7 +112,7 @@ https://github.com/microsoft/pxt-arcade.
 
 ```
 npm install
-npm test          # converts test/samples/*.ts and checks every flowchart is valid
+npm test          # converts test/samples (*.ts and *.cs) and checks every flowchart is valid
 npm run serve     # serves docs/ at http://localhost:8080
 ```
 
@@ -97,6 +120,10 @@ npm run serve     # serves docs/ at http://localhost:8080
   flowcharts. It also works in Node.
   - To change the wording for an API call, edit the `CALLS` phrasebook.
   - To change event headings, edit the `EVENTS` phrasebook.
+- `docs/codeflow-csharp.js` is the Unity converter. It reads C# with tree-sitter
+  (web-tree-sitter 0.24.7 and tree-sitter-c-sharp 0.23.1, loaded from jsDelivr only when Unity
+  is chosen). To change the wording for Unity commands, edit its `CALLS`, `PROPS` and
+  `MESSAGES` phrasebooks.
 - `docs/app.js` is the page: pasting code, share links, rendering, hover links, export and
   editor-extension messaging.
 - The libraries (TypeScript 5.4.5 and Mermaid 11.4.1) load from jsDelivr.

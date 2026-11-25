@@ -130,6 +130,27 @@ kbd { font: 12px ui-monospace, monospace; border: 1px solid var(--border); borde
 .share input { flex: 1; min-width: 0; font: inherit; font-size: 13.5px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
 .small { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
 
+/* ---------- MakeCode / Unity ---------- */
+.lang-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 0 16px 12px; }
+.lang-row .label { margin: 0; }
+body[data-lang="unity"] .mc-only, body:not([data-lang="unity"]) .unity-only { display: none !important; }
+.file-btn { position: relative; display: inline-flex; align-items: center; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.file-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+textarea.drop { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--accent-soft); }
+
+.group-head {
+  margin: 28px 0 0; font-size: 15px; font-weight: 600; color: var(--muted);
+  font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+.toc-group { font-size: 12px; font-weight: 600; color: var(--muted); align-self: center; margin-left: 6px; }
+.toc-group:first-child { margin-left: 0; }
+.dot.vars { background: var(--muted); }
+.card.no-flow .card-body { grid-template-columns: minmax(0, 1fr); }
+.card.no-flow .pseudo { border-right: 0; border-bottom: 0; }
+body[data-view="flow"] .card.no-flow { display: none; }
+
 /* ---------- status / warnings ---------- */
 .status { margin-top: 12px; color: var(--muted); font-size: 14px; }
 .status.error { color: var(--str); }

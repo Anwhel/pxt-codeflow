@@ -1108,5 +1108,8 @@
     }
   }
 
-  return { analyse, _words: words };
+  // Shared helpers, used by the Unity (C#) converter.
+  const util = { Flow, words, titleWords, capFirst, article, negate };
+
+  return { analyse, _words: words, util };
 });

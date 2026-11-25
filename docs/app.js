@@ -50,6 +50,84 @@ game.onUpdateInterval(3000, function () {
 })
 `;
 
+  const EXAMPLE_UNITY = `// ---- File: PlayerController.cs ----
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    public float speed = 5f;
+    [SerializeField] private float jumpForce = 7f;
+    private Rigidbody2D rb;
+    private bool isGrounded;
+    public int coins;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    void Update()
+    {
+        // Move left and right with the arrow keys
+        float move = Input.GetAxis("Horizontal");
+        rb.velocity = new Vector2(move * speed, rb.velocity.y);
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            isGrounded = false;
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
+        else if (other.gameObject.CompareTag("Enemy"))
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Coin"))
+        {
+            coins++;
+            Destroy(other.gameObject);
+        }
+    }
+}
+
+// ---- File: EnemySpawner.cs ----
+using System.Collections;
+using UnityEngine;
+
+public class EnemySpawner : MonoBehaviour
+{
+    public GameObject enemyPrefab;
+    public Transform[] spawnPoints;
+    public float delay = 2f;
+
+    void Start()
+    {
+        StartCoroutine(SpawnEnemies());
+    }
+
+    IEnumerator SpawnEnemies()
+    {
+        while (true)
+        {
+            int i = Random.Range(0, spawnPoints.Length);
+            Instantiate(enemyPrefab, spawnPoints[i].position, Quaternion.identity);
+            yield return new WaitForSeconds(delay);
+        }
+    }
+}
+`;
+
   // ---------------------------------------------------------------------
   // Mermaid set-up (colours come from the CSS variables so dark mode works)
   // ---------------------------------------------------------------------
@@ -112,16 +190,25 @@ game.onUpdateInterval(3000, function () {
   }
 
   async function render(source) {
-    if (!window.ts || !window.mermaid) {
+    if (!window.mermaid || (lang === 'makecode' && !window.ts)) {
       setStatus('The helper libraries did not load. Check your internet connection and reload the page.', true);
       return;
     }
     setStatus('');
     let result;
     try {
-      result = window.Codeflow.analyse(source, window.ts);
+      if (lang === 'unity') {
+        setStatus('Loading the C# reader…');
+        const parser = await loadCSharp();
+        setStatus('');
+        result = window.CodeflowCSharp.analyse(source, parser);
+      } else {
+        result = window.Codeflow.analyse(source, window.ts);
+      }
     } catch (e) {
-      setStatus('Sorry, Codeflow could not read that code: ' + e.message, true);
+      setStatus(lang === 'unity' && !csharpReady
+        ? 'The C# reader did not load. Check your internet connection and try again.'
+        : 'Sorry, Codeflow could not read that code: ' + e.message, true);
       return;
     }
     current = result;
@@ -134,23 +221,41 @@ game.onUpdateInterval(3000, function () {
     $('#legend').hidden = !hasSections;
     $('#topActions').hidden = !hasSections && !inEditor;
 
-    $('#toc').innerHTML = result.sections.map(s =>
-      `<a href="#${s.id}"><span class="dot ${s.kind}"></span>${escapeHtml(shortTitle(s.title))}</a>`).join('');
+    // Table of contents, grouped by script when there are several.
+    let toc = '', lastGroup = null;
+    for (const s of result.sections) {
+      if (s.group && s.group !== lastGroup) {
+        toc += `<span class="toc-group">${escapeHtml(groupLabel(s.group))}</span>`;
+        lastGroup = s.group;
+      }
+      toc += `<a href="#${s.id}"><span class="dot ${s.kind}"></span>${escapeHtml(shortTitle(s.title))}</a>`;
+    }
+    $('#toc').innerHTML = toc;
 
     const container = $('#sections');
     container.innerHTML = '';
     const defs = classDefs();
+    lastGroup = null;
     for (const s of result.sections) {
+      if (s.group && s.group !== lastGroup) {
+        const h = document.createElement('h2');
+        h.className = 'group-head';
+        h.textContent = s.group;
+        container.appendChild(h);
+        lastGroup = s.group;
+      }
+      const hasFlow = !!s.mermaid;
+      const meta = [s.method, s.line ? `line ${s.line}` : ''].filter(Boolean).join(' · ');
       const card = document.createElement('article');
-      card.className = 'card';
+      card.className = 'card' + (hasFlow ? '' : ' no-flow');
       card.id = s.id;
       card.innerHTML = `
         <div class="card-head">
-          <h2>${escapeHtml(s.title)}${s.line ? `<span class="meta">line ${s.line}</span>` : ''}</h2>
+          <h2>${escapeHtml(s.title)}${meta ? `<span class="meta">${escapeHtml(meta)}</span>` : ''}</h2>
           <div class="card-tools">
             <button class="btn small tool-pseudo" data-act="copy">Copy pseudocode</button>
-            <button class="btn small tool-flow" data-act="png">Save flowchart (PNG)</button>
-            <button class="btn small tool-flow" data-act="svg">SVG</button>
+            ${hasFlow ? `<button class="btn small tool-flow" data-act="png">Save flowchart (PNG)</button>
+            <button class="btn small tool-flow" data-act="svg">SVG</button>` : ''}
           </div>
         </div>
         ${s.parent ? `<div class="parent-note">This code is set up inside <b>${escapeHtml(s.parent)}</b>.</div>` : ''}
@@ -158,9 +263,11 @@ game.onUpdateInterval(3000, function () {
           <ol class="pseudo">${s.lines.map(l => `
             <li class="${l.nodeId ? 'linked' : ''}${l.note ? ' note' : ''}" ${l.nodeId ? `data-node="${l.nodeId}"` : ''}><span class="code">${'<span class="indent"></span>'.repeat(l.depth)}${highlight(l.text)}</span></li>`).join('')}
           </ol>
-          <div class="flow" aria-label="Flowchart for ${escapeHtml(s.title)}"></div>
+          ${hasFlow ? `<div class="flow" aria-label="Flowchart for ${escapeHtml(s.title)}"></div>` : ''}
         </div>`;
       container.appendChild(card);
+      card.querySelector('[data-act="copy"]').onclick = () => copyText(pseudoText(s), 'Pseudocode copied');
+      if (!hasFlow) continue;
 
       const flowEl = card.querySelector('.flow');
       const src = s.mermaid + '\n' + defs;
@@ -172,7 +279,6 @@ game.onUpdateInterval(3000, function () {
         flowEl.innerHTML = `<p class="err">Could not draw this flowchart (${escapeHtml(e.message || e)})</p>`;
         console.error(e, src);
       }
-      card.querySelector('[data-act="copy"]').onclick = () => copyText(pseudoText(s), 'Pseudocode copied');
       card.querySelector('[data-act="svg"]').onclick = () => downloadSvg(flowEl, s);
       card.querySelector('[data-act="png"]').onclick = () => downloadPng(flowEl, s);
     }
@@ -183,13 +289,19 @@ game.onUpdateInterval(3000, function () {
     }
   }
 
+  /** "Player.cs · class Player : MonoBehaviour" -> "Player.cs" (or "class Player") for the contents bar. */
+  function groupLabel(g) {
+    const parts = g.split(' · ');
+    return parts.length > 1 ? parts[0] : g.replace(/\s*:.*$/, '');
+  }
+
   function shortTitle(t) { return t.length > 42 ? t.slice(0, 40) + '…' : t; }
 
   /** Find the SVG group mermaid drew for one of our node ids. */
   function nodeEls(flowEl) {
     const map = new Map();
     flowEl.querySelectorAll('g.node').forEach(g => {
-      const m = /flowchart-(s\d+n\d+)-/.exec(g.id) || [null, g.getAttribute('data-id')];
+      const m = /flowchart-([a-z]\d+n\d+)-/.exec(g.id) || [null, g.getAttribute('data-id')];
       if (m[1]) map.set(m[1], g);
     });
     return map;
@@ -324,6 +436,7 @@ game.onUpdateInterval(3000, function () {
       const files = await res.json();
       const code = files['main.ts'];
       if (code == null) throw new Error('no main.ts in project');
+      setLang('makecode');
       $('#code').value = code;
       remember(code);
       await render(code);
@@ -377,23 +490,123 @@ game.onUpdateInterval(3000, function () {
   // Wiring
   // ---------------------------------------------------------------------
 
+  // ---------------------------------------------------------------------
+  // Unity (C#): the C# reader is big, so it only loads when Unity is picked
+  // ---------------------------------------------------------------------
+
+  const TREE_SITTER = 'https://cdn.jsdelivr.net/npm/web-tree-sitter@0.24.7/';
+  const CSHARP_WASM = 'https://cdn.jsdelivr.net/npm/tree-sitter-c-sharp@0.23.1/tree-sitter-c_sharp.wasm';
+  let csharpPromise = null;
+  let csharpReady = false;
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = () => reject(new Error('could not load ' + src));
+      document.head.appendChild(el);
+    });
+  }
+
+  function loadCSharp() {
+    if (!csharpPromise) {
+      csharpPromise = (async () => {
+        if (!window.TreeSitter) await loadScript(TREE_SITTER + 'tree-sitter.js');
+        const Parser = window.TreeSitter;
+        await Parser.init({ locateFile: f => TREE_SITTER + f });
+        const language = await Parser.Language.load(CSHARP_WASM);
+        const parser = new Parser();
+        parser.setLanguage(language);
+        csharpReady = true;
+        return parser;
+      })();
+      csharpPromise.catch(() => { csharpPromise = null; });
+    }
+    return csharpPromise;
+  }
+
+  // ---------------------------------------------------------------------
+  // Choosing MakeCode or Unity
+  // ---------------------------------------------------------------------
+
+  let lang = 'makecode';
+  const LANG_KEY = 'codeflow.lang';
+  const storeKey = () => lang === 'unity' ? STORE_KEY + '.unity' : STORE_KEY;
+
+  function setLang(next, opts) {
+    lang = next;
+    document.body.dataset.lang = next;
+    document.querySelectorAll('.seg.lang button').forEach(b => b.classList.toggle('on', b.dataset.lang === next));
+    $('#code').placeholder = next === 'unity'
+      ? 'using UnityEngine;\n\npublic class Player : MonoBehaviour\n{\n    void Update() { ... }\n}'
+      : 'controller.A.onEvent(ControllerButtonEvent.Pressed, function () { ... })';
+    try { localStorage.setItem(LANG_KEY, next); } catch (e) { /* storage unavailable */ }
+    if (next === 'unity') loadCSharp().catch(() => {}); // start downloading early
+    if (opts && opts.restore) {
+      let saved = null;
+      try { saved = localStorage.getItem(storeKey()); } catch (e) { /* storage unavailable */ }
+      $('#code').value = saved || '';
+    }
+  }
+
+  function looksLikeMakeCode(text) {
+    return /\b(controller|sprites|scene|game|info|tiles)\.\w+\s*\(/.test(text) && !/\busing\s+UnityEngine\b/.test(text);
+  }
+
+  // ---------------------------------------------------------------------
+  // Adding .cs files (button or drag and drop)
+  // ---------------------------------------------------------------------
+
+  async function addFiles(fileList) {
+    const files = [...fileList].filter(f => /\.(cs|ts|js|txt)$/i.test(f.name));
+    if (!files.length) { setStatus('Choose .cs script files from your Unity project (Assets folder).', true); return; }
+    const texts = await Promise.all(files.map(f => f.text()));
+    if (files.some(f => /\.cs$/i.test(f.name))) setLang('unity');
+    const combined = files.length === 1 && lang !== 'unity'
+      ? texts[0]
+      : files.map((f, i) => `// ---- File: ${f.name} ----\n${texts[i].trim()}\n`).join('\n');
+    $('#code').value = combined;
+    remember(combined);
+    render(combined);
+  }
+
+  // ---------------------------------------------------------------------
+  // Wiring
+  // ---------------------------------------------------------------------
+
   function remember(code) {
-    try { localStorage.setItem(STORE_KEY, code); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem(storeKey(), code); } catch (e) { /* storage unavailable */ }
   }
 
   function start() {
     initMermaid();
     document.body.dataset.view = 'both';
 
-    document.querySelectorAll('.seg button').forEach(b => {
+    document.querySelectorAll('.seg.view button').forEach(b => {
       b.onclick = () => {
-        document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === b));
+        document.querySelectorAll('.seg.view button').forEach(x => x.classList.toggle('on', x === b));
         document.body.dataset.view = b.dataset.view;
       };
     });
+    document.querySelectorAll('.seg.lang button').forEach(b => {
+      b.onclick = () => { if (b.dataset.lang !== lang) setLang(b.dataset.lang, { restore: true }); };
+    });
 
-    const go = () => { const c = $('#code').value; remember(c); render(c); };
-    const example = () => { $('#code').value = EXAMPLE; go(); };
+    const go = () => {
+      const c = $('#code').value;
+      // Pasted into the wrong mode? Switch for them.
+      if (lang === 'makecode' && window.CodeflowCSharp && window.CodeflowCSharp.looksLikeCSharp(c)) {
+        setLang('unity');
+        toast('This looks like Unity C#, so Codeflow switched to Unity');
+      } else if (lang === 'unity' && looksLikeMakeCode(c)) {
+        setLang('makecode');
+        toast('This looks like MakeCode, so Codeflow switched to MakeCode');
+      }
+      remember(c);
+      render(c);
+    };
+    const example = () => { $('#code').value = lang === 'unity' ? EXAMPLE_UNITY : EXAMPLE; go(); };
     $('#go').onclick = go;
     $('#example').onclick = example;
     $('#example2').onclick = example;
@@ -405,6 +618,15 @@ game.onUpdateInterval(3000, function () {
     $('#copyAll').onclick = () => {
       if (current) copyText(current.sections.map(pseudoText).join('\n\n'), 'All pseudocode copied');
     };
+    $('#fileInput').addEventListener('change', e => { if (e.target.files.length) addFiles(e.target.files); e.target.value = ''; });
+    const ta = $('#code');
+    ta.addEventListener('dragover', e => { e.preventDefault(); ta.classList.add('drop'); });
+    ta.addEventListener('dragleave', () => ta.classList.remove('drop'));
+    ta.addEventListener('drop', e => {
+      e.preventDefault();
+      ta.classList.remove('drop');
+      if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+    });
 
     // Re-colour flowcharts when the system switches light/dark.
     if (window.matchMedia) {
@@ -415,6 +637,8 @@ game.onUpdateInterval(3000, function () {
     }
 
     if (inEditor) {
+      // Inside MakeCode it is always MakeCode.
+      setLang('makecode');
       document.body.classList.add('in-editor');
       $('#refreshBtn').hidden = false;
       $('#refreshBtn').onclick = requestCode;
@@ -425,15 +649,18 @@ game.onUpdateInterval(3000, function () {
       return;
     }
 
-    let saved = null;
-    try { saved = localStorage.getItem(STORE_KEY); } catch (e) { /* storage unavailable */ }
     const params = new URLSearchParams(location.search);
+    let savedLang = null;
+    try { savedLang = localStorage.getItem(LANG_KEY); } catch (e) { /* storage unavailable */ }
+    const wanted = params.get('lang') === 'unity' || location.hash === '#unity' ? 'unity'
+      : params.get('share') ? 'makecode' : savedLang === 'unity' ? 'unity' : 'makecode';
+    setLang(wanted, { restore: true });
+
     if (params.get('share')) {
       $('#shareUrl').value = params.get('share');
       loadShare();
-    } else if (saved) {
-      $('#code').value = saved;
-      render(saved);
+    } else if ($('#code').value) {
+      render($('#code').value);
     }
   }
 

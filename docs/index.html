@@ -18,11 +18,11 @@
       </svg>
       <div>
         <h1>Codeflow</h1>
-        <p class="tagline">Your MakeCode Arcade game as pseudocode and flowcharts</p>
+        <p class="tagline">Your MakeCode Arcade or Unity game as pseudocode and flowcharts</p>
       </div>
     </div>
     <div class="top-actions" id="topActions" hidden>
-      <div class="seg" role="group" aria-label="What to show">
+      <div class="seg view" role="group" aria-label="What to show">
         <button data-view="both" class="on">Both</button>
         <button data-view="pseudo">Pseudocode</button>
         <button data-view="flow">Flowcharts</button>
@@ -37,17 +37,25 @@
     <section id="inputPanel" class="panel input">
       <details id="inputDetails" open>
         <summary><span>Your code</span><span class="summary-hint" id="summaryHint"></span></summary>
+        <div class="lang-row">
+          <span class="label" id="langLabel">My game is made in</span>
+          <div class="seg lang" role="group" aria-labelledby="langLabel">
+            <button data-lang="makecode" class="on">MakeCode Arcade</button>
+            <button data-lang="unity">Unity (C#)</button>
+          </div>
+        </div>
         <div class="input-grid">
           <div>
-            <label for="code" class="label">Paste your game's JavaScript</label>
-            <textarea id="code" spellcheck="false" placeholder="controller.A.onEvent(ControllerButtonEvent.Pressed, function () { ... })"></textarea>
+            <label for="code" class="label"><span class="mc-only">Paste your game's JavaScript</span><span class="unity-only">Paste one or more C# scripts, or drop .cs files here</span></label>
+            <textarea id="code" spellcheck="false"></textarea>
             <div class="row">
               <button id="go" class="btn primary">Show pseudocode &amp; flowcharts</button>
+              <label class="btn unity-only file-btn">Add .cs files<input id="fileInput" type="file" accept=".cs" multiple></label>
               <button id="example" class="btn">Try an example</button>
               <button id="clear" class="btn ghost">Clear</button>
             </div>
           </div>
-          <div class="help">
+          <div class="help mc-only">
             <h2>How to get your code</h2>
             <ol>
               <li>Open your game in MakeCode Arcade.</li>
@@ -61,6 +69,16 @@
               <button id="loadShare" class="btn">Load</button>
             </div>
             <p class="small">In MakeCode use <b>Share</b> to get a link. Your blocks are turned into JavaScript automatically.</p>
+          </div>
+          <div class="help unity-only">
+            <h2>How to get your code</h2>
+            <ol>
+              <li>In Unity, find your script in the <b>Project</b> window (usually <b>Assets › Scripts</b>).</li>
+              <li>Double-click it to open it in Visual Studio or VS Code.</li>
+              <li>Press <kbd>Ctrl</kbd>+<kbd>A</kbd> then <kbd>Ctrl</kbd>+<kbd>C</kbd>, and paste it into the box.</li>
+            </ol>
+            <p class="or">or add the script files</p>
+            <p class="small">Click <b>Add .cs files</b> or drag scripts from your <b>Assets</b> folder onto the box. You can add several scripts at once. Only scripts are read: scenes, art and settings are not needed.</p>
           </div>
         </div>
       </details>
@@ -83,17 +101,18 @@
     <div id="sections"></div>
 
     <section id="empty" class="empty">
-      <p>Paste some code above, or <button class="linklike" id="example2">try an example game</button>.</p>
+      <p>Paste some code above, or <button class="linklike" id="example2">try an example</button>.</p>
     </section>
   </main>
 
   <footer class="foot">
-    Codeflow reads MakeCode Arcade JavaScript (blocks projects too). Nothing is uploaded: everything runs in your browser.
+    Codeflow reads MakeCode Arcade JavaScript (blocks projects too) and Unity C# scripts. Nothing is uploaded: everything runs in your browser.
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/typescript@5.4.5/lib/typescript.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
   <script src="codeflow.js"></script>
+  <script src="codeflow-csharp.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
