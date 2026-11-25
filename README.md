@@ -67,10 +67,10 @@ WHEN A Button Pressed:
 
 The web page lives in `docs/`. On GitHub go to **Settings → Pages**. Set **Source** to
 *Deploy from a branch*, choose the branch and the `/docs` folder, then save.
-The page will be at `https://anwhel.github.io/Codeflow/`.
+The page will be at `https://anwhel.github.io/pxt-codeflow/`.
 
 A teacher can also link a shared project directly:
-`https://anwhel.github.io/Codeflow/?share=https://makecode.com/_abc123`
+`https://anwhel.github.io/pxt-codeflow/?share=https://makecode.com/_abc123`
 
 ## Inside the MakeCode editor (editor extension)
 

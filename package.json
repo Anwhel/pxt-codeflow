@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Anwhel/Codeflow.git"
+    "url": "git+https://github.com/Anwhel/pxt-codeflow.git"
   },
   "bugs": {
-    "url": "https://github.com/Anwhel/Codeflow/issues"
+    "url": "https://github.com/Anwhel/pxt-codeflow/issues"
   },
-  "homepage": "https://github.com/Anwhel/Codeflow#readme",
+  "homepage": "https://github.com/Anwhel/pxt-codeflow#readme",
   "devDependencies": {
     "mermaid": "11.4.1",
     "typescript": "5.4.5"
